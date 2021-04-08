@@ -2,17 +2,17 @@
 #include <cmath>
 using namespace std;
 
-void wczytywanie(float **tab, int n)
+void load(float **tab, int n)
 {
 	for (int i=0; i<n; i++)
 	{
-		cout << endl << "Podaj " << i+1 << " wiersz:" << endl;
+		cout << endl << "Enter " << i+1 << " row:" << endl;
 		for (int j=0; j<n+1; j++)
             cin >> tab[i][j];
 	}
 }
 
-void wyswietl_macierz(float **tab, int n)
+void show_matrix(float **tab, int n)
 {
     for(int i=0;i<n;i++)
     {
@@ -38,7 +38,7 @@ void wyswietl_macierz(float **tab, int n)
     }
 }
 
-void wyczysc_pamiec(float **tab, float *W, int n)
+void clean_memory(float **tab, float *W, int n)
 {
       for(int i=0;i<n;i++)
 		delete [] tab[i];
@@ -46,7 +46,7 @@ void wyczysc_pamiec(float **tab, float *W, int n)
 	delete [] W;
 }
 
-void zerowanie_macierzy(float **tab, int n, int i)
+void row_reduction(float **tab, int n, int i)
 {
     float p;
 	for (int j=i+1; j<n; j++)
@@ -55,13 +55,13 @@ void zerowanie_macierzy(float **tab, int n, int i)
         for (int k=i; k<n+1; k++)
         {
             tab[j][k] = tab[j][k]-p*tab[i][k];
-            if(fabs(tab[j][k]) < 0.000001) //przypisywanie wartosciom bliskich zera wartosci zero
+            if(fabs(tab[j][k]) < 0.000001) //assigning values close to zero the value zero
                 tab[j][k]=0;
         }
     }
 }
 
-void oblicz_rozwiazania(float *W, float **tab, int n)
+void solve_equations(float *W, float **tab, int n)
 {
     float s;
     W[n-1] = tab[n-1][n]/tab[n-1][n-1];
@@ -74,12 +74,12 @@ void oblicz_rozwiazania(float *W, float **tab, int n)
     }
 }
 
-void wyswietl_rozwiazania(float *W, int n)
+void show_equations(float *W, int n)
 {
-    cout << endl << "Obliczone wartosci:" << endl << endl;
+    cout << endl << "Calculated values:" << endl << endl;
     for(int i=0; i<n; i++)
         cout << "x" << i+1 << " = " << W[i] << endl;
-    cout<<"Wektor rozwiazan x = [";
+    cout<<"Vector x = [";
     for(int i=0;i<n;i++){
         if(i == n-1)
             cout<<W[i];
@@ -90,11 +90,11 @@ void wyswietl_rozwiazania(float *W, int n)
 
 }
 
-bool czy_przekatna_zero(float **tab, int i) //funkcja sprawdzajaca czy mozna dalej przeksztalcac macierz(czy spelnione sa zalozenia metody)
+bool is_diagonal_zero(float **tab, int i) //function checking whether it is possible to transform the matrix (whether assumptions of the method are fulfilled)
 {
     if(tab[i][i] == 0 || fabs(tab[i][i]) < 0.000001)
     {
-        cout<<"Element na glownej przekatnej jest rowny zero! Przerywam dzialanie."<<endl;
+        cout<<"The element on the main diagonal is zero! Program end."<<endl;
         return true;
     }
     else
@@ -102,97 +102,97 @@ bool czy_przekatna_zero(float **tab, int i) //funkcja sprawdzajaca czy mozna dal
 
 }
 
-void metoda_podstawowa(float **tab, int n) //przeksztalcenia macierzy kwadratowej do postaci trojkatnej gornej
+void standard_method(float **tab, int n) // transform a square matrix to an upper triangular matrix
 {
-    float *W = new float[n]; //tablica wynikow
+    float *W = new float[n]; //result table
     for(int i=0; i<n; i++)
     {
-        if(czy_przekatna_zero(tab,i)==true)
+        if(is_diagonal_zero(tab,i)==true)
             exit(1);
         else
-        	zerowanie_macierzy(tab, n, i);
+        	row_reduction(tab, n, i);
     }
-    cout << endl << "Macierz po przeksztalceniu:" << endl << endl;
-    wyswietl_macierz(tab, n);
-    oblicz_rozwiazania(W, tab, n);
-    wyswietl_rozwiazania(W,n);
-    wyczysc_pamiec(tab,W,n);
+    cout << endl << "Matrix after transformation:" << endl << endl;
+    show_matrix(tab, n);
+    solve_equations(W, tab, n);
+    show_equations(W,n);
+    clean_memory(tab,W,n);
 }
 
-void zamiana_kolumn(float **tab, int i, int kolumna, int n) //funkcja pomocnicza do metoda_max
+void swap_columns(float **tab, int i, int column, int n) // helper function to method_max
 {
 	for (int j=0; j<n+1; j++)
-		swap(tab[i][j],tab[kolumna][j]);
+		swap(tab[i][j],tab[column][j]);
 }
 
-void metoda_max(float **tab, int n) //metoda z wyborem elementu maksymalnego w kolumnie
+void method_max(float **tab, int n) //method with selecting the maximum element in the column
 {
-    int kolumna;
-    float *W = new float[n]; //tablica wynikow
+    int column;
+    float *W = new float[n]; //result table
     for(int i=0; i<n; i++)
     {
 		for(int j=i; j<n; j++)
             if (fabs(tab[i][i]) < fabs(tab[i][j]))
-                kolumna=j;
+                column=j;
 
-        if(kolumna!=i)
-            zamiana_kolumn(tab,i,kolumna,n);
+        if(column!=i)
+            swap_columns(tab,i,column,n);
 
-        if(czy_przekatna_zero(tab,i)==true)
+        if(is_diagonal_zero(tab,i)==true)
             exit(1);
         else
-        	zerowanie_macierzy(tab, n, i);
+        	row_reduction(tab, n, i);
     }
-    cout << endl << "Macierz po przeksztalceniu:" << endl << endl;
-    wyswietl_macierz(tab, n);
-    oblicz_rozwiazania(W, tab, n);
-    wyswietl_rozwiazania(W,n);
-    wyczysc_pamiec(tab,W,n);
+    cout << endl << "Matrix after transformation:" << endl << endl;
+    show_matrix(tab, n);
+    solve_equations(W, tab, n);
+    show_equations(W,n);
+    clean_memory(tab,W,n);
 }
 
 int main()
 {
-    int n, wybor, dane;
+    int n, choice, data;
     do{
-    cout<<endl<<"Wybierz metode:"<<endl;
-    cout<<"1. Metoda podstawowa"<<endl<<"2. Metoda z elementem maksymalnym w kolumnie"<<endl<<"3. Wyjscie"<<endl<<"Wybor: ";
-    cin >> wybor;
-    switch(wybor)
+    cout<<endl<<"Select method:"<<endl;
+    cout<<"1. Standard(basic) method"<<endl<<"2. Method with maximal element in the column"<<endl<<"3. Exit"<<endl<<"Choice: ";
+    cin >> choice;
+    switch(choice)
     {
         case 1:
-            cout<<"4. Skorzystaj z macierzy testowej"<<endl<<"5. Wprowadz wlasne dane"<<endl<<"Wybor: ";
-            cin>>dane;
-            if(dane == 4)
+            cout<<"4. Use the test matrix"<<endl<<"5.  Enter your own data"<<endl<<"Choice: ";
+            cin>>data;
+            if(data == 4)
             {
-                cout<<"Dane testowe:"<<endl;
+                cout<<"Test data"<<endl;
                 n=4;
                 float **tab = new float *[n];
                 for(int i=0; i<n; i++)
                     tab[i] = new float [n+1];
-                float T[][n+1]={{1,2,-1,2,0},{1,0,-2,4,4},{0,-3,1.5,7,0},{0,-1,1,6,-1}};//tab testowa
+                float T[][n+1]={{1,2,-1,2,0},{1,0,-2,4,4},{0,-3,1.5,7,0},{0,-1,1,6,-1}};//test array
                 for (int i=0; i<n; i++)
                     for (int j=0; j<n+1; j++)
-                        tab[i][j]=T[i][j]; //przypisanie zawartosci tablicy testowej do "wlasciwej" tablicy
-                wyswietl_macierz(tab,n);
-                metoda_podstawowa(tab,n);
+                        tab[i][j]=T[i][j]; //assign the test array to the "proper" array
+                show_matrix(tab,n);
+                standard_method(tab,n);
                 }
                 else
                 {
-                    cout << "Podaj ilosc zmiennych: ";
+                    cout << "Enter the number of variables: ";
                     cin >> n;
                     float **tab = new float *[n];
                     for(int i=0; i<n; i++)
                         tab[i] = new float [n+1];
-                    wczytywanie(tab, n);
-                    metoda_podstawowa(tab,n);
+                    load(tab, n);
+                    standard_method(tab,n);
                 }
                 break;
             case 2:
-                cout<<"4. Skorzystaj z macierzy testowej"<<endl<<"5. Wprowadz wlasne dane"<<endl<<"Wybor: ";
-                cin>>dane;
-                if(dane==4)
+                cout<<"4. Use the test matrix"<<endl<<"5. Enter your own data"<<endl<<"Choice: ";
+                cin>>data;
+                if(data==4)
                 {
-                    cout<<"Dane testowe:"<<endl;
+                    cout<<"Test data:"<<endl;
                     n=5;
                     float **tab = new float *[n];
                     for(int i=0; i<n; i++)
@@ -200,23 +200,23 @@ int main()
                     float T[][n+1]={{14,-13,3,-16,-42,-37},{3.5,-18,13,-23.75,-21,-5.5},{3.5,3,-5.25,9.25,10.5,12.5},{2,14.5,-10.5,18.5,21,23.5},{1.5,6.75,-9.25,17,-10.5,-45.25}};//tab testowa
                     for (int i=0; i<n; i++)
                         for (int j=0; j<n+1; j++)
-                            tab[i][j]=T[i][j]; //przypisanie zawartosci tablicy testowej do "wlasciwej" tablicy
-                    wyswietl_macierz(tab,n);
-                    metoda_max(tab,n);
+                            tab[i][j]=T[i][j]; //assign the test array to the "proper" array
+                    show_matrix(tab,n);
+                    method_max(tab,n);
                 }
                 else
                 {
-                    cout << "Podaj ilosc zmiennych: ";
+                    cout << "Enter the number of variables: ";
                     cin >> n;
                     float **tab = new float *[n];
                     for(int i=0; i<n; i++)
                         tab[i] = new float [n+1];
-                    wczytywanie(tab, n);
-                    metoda_max(tab,n);
+                    load(tab, n);
+                    method_max(tab,n);
                 }
                 break;
         }
-    }while(wybor!=3);
+    }while(choice!=3);
 
     return 0;
 }
