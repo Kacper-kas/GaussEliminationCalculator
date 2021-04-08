@@ -2,7 +2,7 @@
 
 PL:
 
-Prosty, konsolowy program do rozwiązywanie układu równań liniowych za pomocą metody eliminacji Gaussa.
+Prosty, konsolowy program do rozwiązywania układu równań liniowych za pomocą metody eliminacji Gaussa.
 
 Dostępne metody:
 1. metoda podstawowa,
